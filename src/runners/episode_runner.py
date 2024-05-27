@@ -79,11 +79,12 @@ class EpisodeRunner:
                 "enemy_obs":[self.env.get_enemy_obs()]
             }
 
-            pre_types, target_types = self.env.get_type_judge_result()
 
             if self.judge_model_used:
+                pre_types, target_types = self.env.get_type_judge_result()
                 pre_types_list.append(pre_types)
                 target_types_list.append(target_types.to(self.args.device))
+
 
             accurancy = self.env.get_type_judege_accurancy()
             accuracy_list.append(accurancy)
@@ -107,16 +108,22 @@ class EpisodeRunner:
             
             reward, terminated, env_info = self.env.step(actions[0])
             episode_return += reward
+            if self.judge_model_used:
+                post_transition_data = {
+                    "actions": cpu_actions,
+                    "reward": [(reward,)],
+                    "terminated": [(terminated != env_info.get("episode_limit", False),)],
 
-            post_transition_data = {
-                "actions": cpu_actions,
-                "reward": [(reward,)],
-                "terminated": [(terminated != env_info.get("episode_limit", False),)],
-
-                "pre_types": pre_types,
-                "target_types": target_types,
-                "accurancy": [(accurancy, )],
-            }
+                    "pre_types": pre_types,
+                    "target_types": target_types,
+                    "accurancy": [(accurancy, )],
+                }
+            else:
+                post_transition_data = {
+                    "actions": cpu_actions,
+                    "reward": [(reward,)],
+                    "terminated": [(terminated != env_info.get("episode_limit", False),)],
+                }
 
             self.batch.update(post_transition_data, ts=self.t)
 
@@ -161,12 +168,14 @@ class EpisodeRunner:
 
         if test_mode and (len(self.test_returns) == self.args.test_nepisode):
             self._log(cur_returns, cur_stats, log_prefix)
-            self.logger.log_stat("judge_accuracy_mean", np.mean(accuracy_list), self.t_env)
-            self.logger.log_stat("judge_accuracy_ste", np.std(accuracy_list), self.t_env)
+            if self.judge_model_used:
+                self.logger.log_stat("judge_accuracy_mean", np.mean(accuracy_list), self.t_env)
+                self.logger.log_stat("judge_accuracy_ste", np.std(accuracy_list), self.t_env)
         elif self.t_env - self.log_train_stats_t >= self.args.runner_log_interval:
             self._log(cur_returns, cur_stats, log_prefix)
-            self.logger.log_stat("judge_accuracy_mean", np.mean(accuracy_list), self.t_env)
-            self.logger.log_stat("judge_accuracy_ste", np.std(accuracy_list), self.t_env)
+            if self.judge_model_used:
+                self.logger.log_stat("judge_accuracy_mean", np.mean(accuracy_list), self.t_env)
+                self.logger.log_stat("judge_accuracy_ste", np.std(accuracy_list), self.t_env)
 
             if hasattr(self.mac.action_selector, "epsilon"):
                 self.logger.log_stat("epsilon", self.mac.action_selector.epsilon, self.t_env)
