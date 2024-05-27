@@ -80,8 +80,10 @@ class EpisodeRunner:
             }
 
             pre_types, target_types = self.env.get_type_judge_result()
-            pre_types_list.append(pre_types)
-            target_types_list.append(target_types.to(self.args.device))
+
+            if self.judge_model_used:
+                pre_types_list.append(pre_types)
+                target_types_list.append(target_types.to(self.args.device))
 
             accurancy = self.env.get_type_judege_accurancy()
             accuracy_list.append(accurancy)
