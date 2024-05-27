@@ -9,7 +9,7 @@ class EpisodeRunner:
 
     def __init__(self, args, logger):
 
-        self.store_info = True
+        self.store_info = False
 
         self.args = args
         self.logger = logger

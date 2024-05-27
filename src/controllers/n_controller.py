@@ -32,6 +32,7 @@ class NMAC(BasicMAC):
         agent_outs, self.hidden_states = self.agent(agent_inputs, self.hidden_states)
 
 
+
         if store is not None:
             agent_pre = th.tensor(agent_outs, dtype=th.int)
             agent_pre = th.tensor(agent_pre, dtype=th.float)

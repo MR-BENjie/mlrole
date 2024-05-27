@@ -15,6 +15,7 @@ class ParallelRunner:
         self.logger = logger
         self.batch_size = self.args.batch_size_run
 
+        #torch.multiprocessing.set_start_method("spawn")
         # Make subprocesses for the envs
         self.parent_conns, self.worker_conns = zip(*[Pipe() for _ in range(self.batch_size)])
         env_fn = env_REGISTRY[self.args.env]
@@ -27,9 +28,11 @@ class ParallelRunner:
         for p in self.ps:
             p.daemon = True
             p.start()
+            print()
 
         self.parent_conns[0].send(("get_env_info", None))
         self.env_info = self.parent_conns[0].recv()
+
         self.episode_limit = self.env_info["episode_limit"]
 
         self.t = 0
@@ -69,7 +72,6 @@ class ParallelRunner:
         # Reset the envs
         for parent_conn in self.parent_conns:
             parent_conn.send(("reset", None))
-
         pre_transition_data = {
             "state": [],
             "avail_actions": [],
