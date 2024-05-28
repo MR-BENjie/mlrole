@@ -4,6 +4,7 @@
 - Performance is *not* comparable of models trained with different number of processes. 
 ```
 
+
 # PyMARL2
 
 Open-source code for [Rethinking the Implementation Tricks and Monotonicity Constraint in Cooperative Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2102.03479).
@@ -47,6 +48,8 @@ There are so many code-level tricks in the  Multi-agent Reinforcement Learning (
 - The Surprising Effectiveness of MAPPO in Cooperative, Multi-Agent Games
 
 Using a few of tricks above (bold texts), we enabled QMIX (qmix.yaml) to solve almost all hard scenarios of SMAC (Fine-tuned hyperparameters **for each scenarios**).
+
+- **One team, called "the enemy", is controlled by Starcraft II's in-game AI, while the other team, called "the allies", is controlled by reinforcement learning agents.**
 
 | Senarios     | Difficulty | QMIX (batch_size=128) |                   Finetuned-QMIX                   |
 | ------------ | :--------: | :-------------------: | :------------------------------------------------: |

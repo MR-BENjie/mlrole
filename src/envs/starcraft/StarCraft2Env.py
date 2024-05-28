@@ -351,9 +351,9 @@ class StarCraft2Env(MultiAgentEnv):
                 map_data=self._run_config.map_data(_map.path)),
             realtime=False,
             random_seed=self._seed)
-        create.player_setup.add(type=sc_pb.Participant)
+        create.player_setup.add(type=sc_pb.Participant) # RL agent (sc_pb.Participant)
         create.player_setup.add(type=sc_pb.Computer, race=races[self._bot_race],
-                                difficulty=difficulties[self.difficulty])
+                                difficulty=difficulties[self.difficulty]) # BOT 如果修改这个为participant ，则env.step 中action 为 2个阵营 actions 的拼接（list）
         self._controller.create_game(create)
 
         join = sc_pb.RequestJoinGame(race=races[self._agent_race],
