@@ -203,6 +203,10 @@ All results will be stored in the `Results` folder and named with `map_name`.
 # all python and game processes of current user will quit.
 bash clean.sh
 ```
+**Battle between two models**
+```shell 
+python src/main_battle.py --env-config=sc2 with env_args.map_name=2s3z 
+```
 
 # Citation
 

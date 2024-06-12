@@ -24,6 +24,9 @@ from s2clientprotocol import sc2api_pb2 as sc_pb
 from s2clientprotocol import raw_pb2 as r_pb
 from s2clientprotocol import debug_pb2 as d_pb
 
+from pysc2.lib import run_parallel
+from pysc2.lib import portspicker
+
 races = {
     "R": sc_common.Random,
     "P": sc_common.Protoss,
@@ -109,6 +112,8 @@ class StarCraft2Env(MultiAgentEnv):
         our_method_used = False,
         jude_role_mode = None,
         use_judge_model = False,
+
+        two_rl_agent = False,
     ):
         """
         Create a StarCraftC2Env environment.
@@ -318,8 +323,12 @@ class StarCraft2Env(MultiAgentEnv):
         self.pre_types = None
         self.target_types = None
         self.accurancy = None
+
+        self.two_rl_agent = two_rl_agent # set true in battle, use two rl agent control two team
         # prepare to do : 将判断agent role的网络放在这个env中，在这里get——obs中对这个模型进行训练，然后如果用sc2——mlrole，就先用这个模型判断hind——agent的角色
         # 确定jude——role——mode，然后再用jude——role——mode 直接在这里重构obs。 只有self.our_method_used=True， 才会进行判断，才会设置jude—role—mode
+        if self.two_rl_agent:
+            self._parallel = run_parallel.RunParallel()  # Needed for multiplayer.
 
         if self.sc2_mlrole:
             print("experiment in mlrole, random the observation of the agents!")
@@ -342,6 +351,11 @@ class StarCraft2Env(MultiAgentEnv):
         # Setting up the interface
         interface_options = sc_pb.InterfaceOptions(raw=True, score=False)
         self._sc2_proc = self._run_config.start(window_size=self.window_size, want_rgb=False)
+
+        if self.two_rl_agent:
+            self._sc2_proc_2 = self._run_config.start(window_size=self.window_size, want_rgb=False)
+            self._controller_2 = self._sc2_proc_2.controller
+
         self._controller = self._sc2_proc.controller
 
         # Request to create the game
@@ -351,14 +365,55 @@ class StarCraft2Env(MultiAgentEnv):
                 map_data=self._run_config.map_data(_map.path)),
             realtime=False,
             random_seed=self._seed)
+
+        if self.two_rl_agent:
+            create = sc_pb.RequestCreateGame(
+                local_map=sc_pb.LocalMap(
+                    map_path=_map.path),
+                realtime=False,
+                random_seed=self._seed)
+            map_data = self._run_config.map_data(_map.path)
+            self._controller.save_map(create.local_map.map_path,map_data)
+            self._controller_2.save_map(create.local_map.map_path, map_data)
+
         create.player_setup.add(type=sc_pb.Participant) # RL agent (sc_pb.Participant)
-        create.player_setup.add(type=sc_pb.Computer, race=races[self._bot_race],
+        if self.two_rl_agent:
+            create.player_setup.add(type=sc_pb.Participant)
+        else:
+           create.player_setup.add(type=sc_pb.Computer, race=races[self._bot_race],
                                 difficulty=difficulties[self.difficulty]) # BOT 如果修改这个为participant ，则env.step 中action 为 2个阵营 actions 的拼接（list）
+
         self._controller.create_game(create)
 
-        join = sc_pb.RequestJoinGame(race=races[self._agent_race],
-                                     options=interface_options)
-        self._controller.join_game(join)
+        if not self.two_rl_agent:
+            join = sc_pb.RequestJoinGame(race=races[self._agent_race],
+                                         options=interface_options)
+            self._controller.join_game(join)
+
+        else:
+            joins = []
+            self._ports = portspicker.pick_unused_ports(2 * 2)
+
+            map_data = _map.data(self._run_config)
+
+
+
+            for join_id in range(2):
+                join = sc_pb.RequestJoinGame(race=races[self._agent_race],
+                                         options=interface_options)
+                join.player_name = "model_agent"
+                join.shared_port = 0  # unused
+                join.server_ports.game_port = self._ports[0]
+                join.server_ports.base_port = self._ports[1]
+
+                join.client_ports.add(game_port=self._ports[2],
+                                      base_port=self._ports[3])
+                joins.append(join)
+
+            print("join.......")
+            self._parallel.run((c.join_game, join)
+                       for c, join in zip([self._controller, self._controller_2], joins))
+
 
         game_info = self._controller.game_info()
         map_info = game_info.start_raw
@@ -518,11 +573,106 @@ class StarCraft2Env(MultiAgentEnv):
 
         return reward, terminated, info
 
+    def step_Twoagent(self, actions):
+        """A single environment step. Returns reward, terminated, info."""
+        assert  self.two_rl_agent
+
+        actions_int = []
+        for action in actions:
+            tmp = []
+            for a in action:
+                tmp.append(int(a))
+            actions_int.append(tmp)
+
+        #self.last_action = np.eye(self.n_actions)[np.array(actions_int)]
+
+        # Collect individual actions
+        sc_actions = []
+        if self.debug:
+            logging.debug("Actions".center(60, "-"))
+
+        a_id = 0
+        for action_list in actions_int:
+            tmp = []
+            for action in action_list:
+                if not self.heuristic_ai:
+                    sc_action = self.get_agent_action(a_id, action)
+                else:
+                    sc_action, action_num = self.get_agent_action_heuristic(
+                        a_id, action)
+                    actions[a_id] = action_num
+                if sc_action:
+                    tmp.append(sc_action)
+            sc_actions.append(tmp)
+            a_id += 1
+        # Send action request
+        req_actions = sc_pb.RequestAction(actions=sc_actions[0])
+        enemy_req_actions = sc_pb.RequestAction(actions=sc_actions[1])
+        try:
+            self._controller.actions(req_actions)
+            self._controller_2.actions(enemy_req_actions)
+            # Make step in SC2, i.e. apply actions
+            self._controller.step(self._step_mul)
+            self._controller_2.step(self._step_mul)
+            # Observe here so that we know if the episode is over.
+            self._obs = self._controller.observe()
+        except (protocol.ProtocolError, protocol.ConnectionError):
+            self.full_restart()
+            return 0, True, {}
+
+        self._total_steps += 1
+        self._episode_steps += 1
+
+        # Update units
+        game_end_code = self.update_units()
+
+        terminated = False
+        reward = self.reward_battle()
+        info = {"battle_won": False}
+
+        if game_end_code is not None:
+            # Battle is over
+            terminated = True
+            self.battles_game += 1
+            if game_end_code == 1 and not self.win_counted:
+                self.battles_won += 1
+                self.win_counted = True
+                info["battle_won"] = True
+                if not self.reward_sparse:
+                    reward += self.reward_win
+                else:
+                    reward = 1
+            elif game_end_code == -1 and not self.defeat_counted:
+                self.defeat_counted = True
+                if not self.reward_sparse:
+                    reward += self.reward_defeat
+                else:
+                    reward = -1
+
+        elif self._episode_steps >= self.episode_limit:
+            # Episode limit reached
+            terminated = True
+            if self.continuing_episode:
+                info["episode_limit"] = True
+            self.battles_game += 1
+            self.timeouts += 1
+
+        if self.debug:
+            logging.debug("Reward = {}".format(reward).center(60, '-'))
+
+        if terminated:
+            self._episode_count += 1
+
+        if self.reward_scale:
+            reward /= self.max_reward / self.reward_scale_rate
+
+        return reward, terminated, info
+
     def get_agent_action(self, a_id, action):
         """Construct the action for agent a_id."""
         avail_actions = self.get_avail_agent_actions(a_id)
-        assert avail_actions[action] == 1, \
-                "Agent {} cannot perform action {}".format(a_id, action)
+
+        assert avail_actions[action] == 1
 
         unit = self.get_unit_by_id(a_id)
         tag = unit.tag
@@ -594,7 +744,11 @@ class StarCraft2Env(MultiAgentEnv):
                 target_unit = self.agents[target_id]
                 action_name = "heal"
             else:
-                target_unit = self.enemies[target_id]
+                if a_id < len(self.agents):
+                    target_unit = self.enemies[target_id]
+                else:
+                    assert self.two_rl_agent
+                    target_unit = self.agents[target_id]
                 action_name = "attack"
 
             action_id = actions[action_name]
@@ -1171,6 +1325,11 @@ class StarCraft2Env(MultiAgentEnv):
 
                     agent_obs = np.concatenate(agent_obs_list)
 
+                    del agent_obs_list
+                    del ally_stalker_feats
+                    del ally_zealot_feats
+                    del enemy_stalker_feats
+                    del enemy_zealot_feats
 
         else:
             if unit.health > 0:  # otherwise dead, return all zeros
@@ -1361,13 +1520,13 @@ class StarCraft2Env(MultiAgentEnv):
 
         for al_id in self.ally_hind_ids:
             ambiguous.append(hind_obs[al_id])
-            tmp = torch.zeros(4)
+            tmp = torch.zeros(self.type_kinds)
             tmp[self.ally_id_type_map[al_id]] = 1
             target_types.append(tmp)
         for en_id in self.enemy_hind_ids:
             ambiguous.append(hind_obs[en_id+self.n_agents])
 
-            tmp = torch.zeros(4)
+            tmp = torch.zeros(self.type_kinds)
             tmp[self.enemy_id_type_map[en_id]] = 1
             target_types.append(tmp)
         input_node['ambiguous'] = torch.vstack(ambiguous)
@@ -1400,6 +1559,8 @@ class StarCraft2Env(MultiAgentEnv):
 
         del hind_obs
         del input_node
+        del ambiguous
+        del target_types
 
     def get_type_judge_result(self):
         return self.pre_types, self.target_types
@@ -1457,7 +1618,7 @@ class StarCraft2Env(MultiAgentEnv):
             sight_range = self.unit_sight_range(agent_id)
 
             # Movement features
-            avail_actions = self.get_avail_agent_actions(agent_id)
+            avail_actions = self.get_avail_agent_actions(agent_id+self.n_agents)
             for m in range(self.n_actions_move):
                 move_feats[m] = avail_actions[m + 2]
 
@@ -1524,6 +1685,7 @@ class StarCraft2Env(MultiAgentEnv):
             for i, al_item in enumerate(self.enemies.items()):
                 al_id = al_item[0]
                 al_unit = al_item[1]
+
                 i = i-dec_num
                 if al_id == agent_id:
                     dec_num = 1
@@ -1936,7 +2098,12 @@ class StarCraft2Env(MultiAgentEnv):
             # Can attack only alive units that are alive in the shooting range
             shoot_range = self.unit_shoot_range(agent_id)
 
-            target_items = self.enemies.items()
+            target_items = None
+            if agent_id < len(self.agents):
+                target_items = self.enemies.items()
+            else:
+                target_items = self.agents.items()
+
             if self.map_type == "MMM" and unit.unit_type == self.medivac_id:
                 # Medivacs cannot heal themselves or other flying units
                 target_items = [
@@ -1967,6 +2134,13 @@ class StarCraft2Env(MultiAgentEnv):
             avail_actions.append(avail_agent)
         return avail_actions
 
+
+    def get_enemy_avail_actions(self):
+        avail_actions = []
+        for agent_id in range(self.n_agents):
+            avail_agent = self.get_avail_agent_actions(agent_id+self.n_agents)
+            avail_actions.append(avail_agent)
+        return avail_actions
     def close(self):
         """Close StarCraft II."""
         if self._sc2_proc:
@@ -2147,8 +2321,10 @@ class StarCraft2Env(MultiAgentEnv):
 
     def get_unit_by_id(self, a_id):
         """Get unit by ID."""
-        return self.agents[a_id]
-
+        if a_id < len(self.agents):
+            return self.agents[a_id]
+        else:
+            return self.enemies[a_id-len(self.agents)]
     def get_stats(self):
         stats = {
             "battles_won": self.battles_won,
