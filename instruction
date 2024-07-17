@@ -2,3 +2,8 @@ python src/main.py --config=qmix --env-config=sc2 with env_args.map_name=3s5z en
 
 python src/main.py --config=qmix --env-config=sc2 with env_args.map_name=1c3s5z env_args.type_kinds=6 env_args.ally_hind_ids=[0,2,3,6,7,8] env_args.enemy_hind_ids=[0,2,3,6,7,8] env_args.ally_public_ids=[1,4,5] env_args.enemy_public_ids=[1,4,5] env_args.ally_id_type_map=[3,4,4,4,5,5,5,5,5] env_args.enemy_id_type_map=[0,1,1,1,2,2,2,2,2] runner=episode t_max=1500000
 
+
+#QRealtion model
+## prepare: pip install torch_geometric, dgl
+## run
+python src/main.py --config=QRelation --env-config=sc2 with  env_args.map_name=2s3z mac=qrealtion_mac agent=qrelation_rnn

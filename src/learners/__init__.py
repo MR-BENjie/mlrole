@@ -9,7 +9,7 @@ from .max_q_learner import MAXQLearner
 from .dmaq_qatten_learner import DMAQ_qattenLearner
 from .offpg_learner import OffPGLearner
 from .fmac_learner import FMACLearner
-
+from .q_graph_learner import QGraphLearner
 REGISTRY = {}
 
 REGISTRY["q_learner"] = QLearner
@@ -23,3 +23,4 @@ REGISTRY["max_q_learner"] = MAXQLearner
 REGISTRY["dmaq_qatten_learner"] = DMAQ_qattenLearner
 REGISTRY["offpg_learner"] = OffPGLearner
 REGISTRY["fmac_learner"] = FMACLearner
+REGISTRY["Qrelation_learner"] = QGraphLearner

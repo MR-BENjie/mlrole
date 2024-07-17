@@ -49,3 +49,31 @@ label: "default_label"
 run: "default"
 
 judge_model_used: True
+
+#----- graph method params -----
+gnn_method: "none"
+graph: "ranked"  #could be also "all", which means all the
+top_k: 4  # the top-k closest node will be connected
+
+
+#--------- Actor critic parmas -----
+distributional_return: False
+num_support: 51
+vmin: 0
+vmax: 500
+divide_actor_td: False
+critic_optimizer: RMSprop
+critic_learn_repetition: 1 #how many times the critic update is called when learning is called
+agent_critic: False   #whether the agent is also used for critic, here means share parameters
+separate_parameters: False #valid only agent_critic, whether use two sets of parameters for actor and critic
+use_policy_entropy: False
+entropy_lambda: 0.01
+coma_qmix_optimizer_one: False #whether to combine the loss of coma and qmix together, and optimize them at once
+num_heads: 4 # use in qatten, qattenw
+attention_weight_kl_regulzation: False #use the kl of attentiona weights as regulazator
+graph_library: dgl  #dgl or pyG
+n_steps: 1
+debug: False
+output_agent_gnn_weights: False
+qgraph_fix: False
+full_relational_graph: False #in default, the relational graph is also based on proximity, it only connect nearby agents with specify edge type

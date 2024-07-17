@@ -254,7 +254,7 @@ class StarCraft2Env(MultiAgentEnv):
         self.heuristic_rest = heuristic_rest
         self.debug = debug
         self.window_size = (window_size_x, window_size_y)
-        self.replay_dir = replay_dir
+        self.replay_dir = replay_dirw
         self.replay_prefix = replay_prefix
 
         # Actions
