@@ -90,6 +90,7 @@ class BasicMAC:
         if self.args.obs_agent_id:
             inputs.append(th.eye(self.n_agents, device=batch.device).unsqueeze(0).expand(bs, -1, -1))
 
+        # actions_onehot = 6+n_enemy
         inputs = th.cat([x.reshape(bs, self.n_agents, -1) for x in inputs], dim=-1)
         return inputs
 
