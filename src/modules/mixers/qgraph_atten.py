@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 from modules.attention.SelfAttention import Multihead_Attention
-from modules.agents.rnn_gnn import GraphPyG, adjacency_and_create_graph
+from modules.agents.qrelation_rnn_gnn import GraphPyG, adjacency_and_create_graph
 from modules.agents.graph_helper import *
 from utils.logging import get_logger
 logger = get_logger()
