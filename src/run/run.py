@@ -93,7 +93,7 @@ def run_sequential(args, logger):
 
     # Set up schemes and groups here
     env_info = runner.get_env_info()
-    env_info.update(get_map_params(args.env_args.map_name))
+    env_info.update(get_map_params(args.env_args["map_name"]))
     args.n_agents = env_info["n_agents"]
     args.n_actions = env_info["n_actions"]
     args.state_shape = env_info["state_shape"]
