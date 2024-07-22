@@ -96,6 +96,13 @@ def run_sequential(args, logger):
     args.n_agents = env_info["n_agents"]
     args.n_actions = env_info["n_actions"]
     args.state_shape = env_info["state_shape"]
+
+    if "n_enemies" in env_info:
+        args.n_enemies = env_info["n_enemies"]
+        args.unit_type_bits = env_info["unit_type_bits"]
+        args.shield_bits_enemy = env_info["shield_bits_enemy"]
+        args.shield_bits_ally = env_info["shield_bits_ally"]
+
     args.accumulated_episodes = getattr(args, "accumulated_episodes", None)
     args.obs_shape = env_info['obs_shape']
     if getattr(args, 'agent_own_state_size', False):
