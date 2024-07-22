@@ -8,7 +8,7 @@ from types import SimpleNamespace as SN
 from utils.logging import Logger
 from utils.timehelper import time_left, time_str
 from os.path import dirname, abspath
-
+from envs.starcraft.smac_maps import get_map_params
 from learners import REGISTRY as le_REGISTRY
 from runners import REGISTRY as r_REGISTRY
 from controllers import REGISTRY as mac_REGISTRY
@@ -93,12 +93,11 @@ def run_sequential(args, logger):
 
     # Set up schemes and groups here
     env_info = runner.get_env_info()
+    env_info.update(get_map_params(args.env_args.map_name))
     args.n_agents = env_info["n_agents"]
     args.n_actions = env_info["n_actions"]
     args.state_shape = env_info["state_shape"]
 
-    print(env_info)
-    
     if "n_enemies" in env_info:
         args.n_enemies = env_info["n_enemies"]
         args.unit_type_bits = env_info["unit_type_bits"]
