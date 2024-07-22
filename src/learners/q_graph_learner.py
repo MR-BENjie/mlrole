@@ -10,7 +10,7 @@ import torch as th
 from torch.optim import RMSprop
 
 from utils.logging import get_logger
-from .util import save_a_game
+from .qrelation_util import save_a_game
 logger = get_logger()
 
 
