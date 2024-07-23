@@ -4,6 +4,7 @@ python src/main.py --config=qmix --env-config=sc2 with env_args.map_name=1c3s5z 
 
 
 #QRealtion model
-## prepare: pip install torch_geometric, dgl
+## prepare: pip install torch_geometric,
+## prepare: pip install  dgl -f https://data.dgl.ai/wheels/torch-2.3/repo.html
 ## run
 python src/main.py --config=QRelation --env-config=sc2 with  env_args.map_name=2s3z mac=qrealtion_mac agent=qrelation_rnn

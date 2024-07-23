@@ -150,12 +150,12 @@ class NQLearner:
         grad_norm = th.nn.utils.clip_grad_norm_(self.params, self.args.grad_norm_clip)
         self.optimiser.step()
 
-        """
+
         if self.judge_model_used:
             loss_judge_model = self.judge_model_loss_function(pre_types, target_types)
             self.judge_optimiser.zero_grad()
             loss_judge_model.backward()
-            self.judge_optimiser.step()"""
+            self.judge_optimiser.step()
 
         if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
             self._update_targets()

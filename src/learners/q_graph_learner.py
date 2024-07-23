@@ -6,11 +6,15 @@ from modules.mixers.vdn import VDNMixer
 from modules.mixers.qmix import QMixer
 from modules.mixers.qgraph_atten import QGraphAttention
 
+import torch
 import torch as th
 from torch.optim import RMSprop
 
 from utils.logging import get_logger
 from .qrelation_util import save_a_game
+
+from modules.role_judge_model import role_Encode, MlroleNode
+
 logger = get_logger()
 
 
@@ -43,6 +47,17 @@ class QGraphLearner:
         self.target_mac = copy.deepcopy(mac)
 
         self.log_stats_t = -self.args.learner_log_interval - 1
+
+        self.judge_model_used = args.judge_model_used
+        self.judge_model_encode = role_Encode(in_features=args.obs_shape, mlp_hiddens=[128, 512], mlp_out_features=256,
+                                              hiddens=128, )
+        self.judge_model_node = MlroleNode(role_types=args.env_args["type_kinds"], gru_hiddens=128, )
+
+        if self.judge_model_used:
+            self.judge_model_loss_function = torch.nn.MSELoss()
+            self.judge_optimiser = RMSprop(
+            params=(list(self.judge_model_node.parameters()) + list(self.judge_model_node.parameters())),
+                    lr=args.lr, alpha=args.optim_alpha, eps=args.optim_eps)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
