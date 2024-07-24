@@ -23,7 +23,7 @@ def adjacency_and_create_graph(ob, n_agents, dis_idx, graph_library):
 
     agent_ids_new = torch.where(dis_l > 0, agent_ids, torch.zeros_like(agent_ids)-1).to(ob.device)
     # empty_array = torch.zeros_like(agent_ids_new).to(ob.device)
-    bar = torch.arange(0, n_agents).to(ob.device).repeat(int(ob.shape[0]//n_agents), 1).reshape(-1, 1)
+    bar = 0
     a_big = torch.where(agent_ids_new >= bar, agent_ids_new, torch.zeros_like(agent_ids_new))
     a2 = torch.where(agent_ids_new < bar, agent_ids_new, torch.zeros_like(agent_ids_new))
     # k = (torch.arange(0, agent_ids.shape[0]).to(ob.device) // self.n_agents + 1).reshape(-1,1)
