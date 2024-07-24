@@ -51,11 +51,12 @@ def adjacency_and_create_graph(ob, n_agents, dis_idx, graph_library):
     if graph_library == "dgl":
         # Construct a DGLGraph
         graph = dgl.DGLGraph()
-        graph.to(ob.device)
+
 
         if new_a.shape[0] > 0:
             graph.add_edges(new_a.long(), new_b.long())
         graph.add_edges(graph.nodes(), graph.nodes()) # add self-loop
+        graph.to(ob.device)
     elif graph_library == "pyG":
         edge_index = torch.cat([new_a.reshape(1, -1), new_b.reshape(1,-1)], dim=0)
         if edge_index.shape[1] == 0:
