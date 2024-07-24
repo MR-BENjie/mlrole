@@ -33,7 +33,7 @@ mixer: "qgraph_attention"
 learner: "Qrelation_learner"
 
 save_graph: False
-gnn_method: "None"
+gnn_method: ar
 num_gnn_layers: 2
 output_agent_gnn_weights: False  #there is not weight to be output
 is_output_attention_weights: True #whether output the attention weight of gnn for mixer
