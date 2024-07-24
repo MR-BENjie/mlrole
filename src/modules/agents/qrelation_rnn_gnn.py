@@ -54,7 +54,7 @@ def adjacency_and_create_graph(ob, n_agents, dis_idx, graph_library):
 
 
         if new_a.shape[0] > 0:
-            graph.add_edges(new_a.long(), new_b.long())
+            graph.add_edges(new_a.long().cpu(), new_b.long().cpu())
         graph.add_edges(graph.nodes(), graph.nodes()) # add self-loop
         graph.to(ob.device)
     elif graph_library == "pyG":
