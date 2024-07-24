@@ -20,7 +20,7 @@ class QrelationRNNAgent(nn.Module):
 
         self.n_agents = args.n_agents
 
-        self.dim_x = int((input_shape-6)/self.n_agents)
+        self.dim_x = int(int((input_shape-6)/self.n_agents)-1)/2
         self.agent_feats_dim = self.dim_x*self.n_agents*2
         self.distance_index = [5+self.dim_x*i for i in range(self.n_agents*2-1)]
 
