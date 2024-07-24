@@ -28,7 +28,7 @@ class NRNNAgent(nn.Module):
 
     def forward(self, inputs, hidden_state):
         b, a, e = inputs.size()
-
+        print(inputs.size)
         inputs = inputs.view(-1, e)
         x = F.relu(self.fc1(inputs), inplace=True)
         h_in = hidden_state.reshape(-1, self.args.rnn_hidden_dim)
