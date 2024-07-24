@@ -31,9 +31,8 @@ class QrelationRNNAgent(nn.Module):
     def forward(self, inputs, hidden_state=None):
         b, a, e = inputs.size()
 
-        print(inputs.shape)
         # inputs.shape = [5, 96] 4+ x*(n_agent-1) + x*(n_agent) + (x-4) + 6+n_agent + n_agent
-        g = adjacency_and_create_graph(inputs[: self.agent_feats_dim], self.args.n_agents*2, self.distance_index, self.graph_library)
+        g = adjacency_and_create_graph(torch.squeeze(inputs[: self.agent_feats_dim]), self.args.n_agents*2, self.distance_index, self.graph_library)
 
         x = F.relu(self.fc1(inputs.view(-1, e)), inplace=True)
         if hidden_state is not None:

@@ -20,7 +20,6 @@ def adjacency_and_create_graph(ob, n_agents, dis_idx, graph_library):
     agent_ids = torch.arange(0, n_agents-1).to(ob.device)
     agent_ids = agent_ids.repeat(ob.shape[0], 1)
     dis_l = ob[:, dis_idx]
-    print(ob.shape)
     print(agent_ids.shape)
     print(dis_l.shape)
     agent_ids_new = torch.where(dis_l > 0, agent_ids, torch.zeros_like(agent_ids)-1).to(ob.device)
