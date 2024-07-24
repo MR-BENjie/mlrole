@@ -20,7 +20,7 @@ mixing_embed_dim: 32
 hypernet_layers: 2
 hypernet_embed: 64
 
-graph_library: pyG  #dgl or pyG
+graph_library: dgl  #dgl or pyG
 num_heads: 4 # use in qatten, qattenw, qgraph_atten
 
 
