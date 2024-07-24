@@ -48,6 +48,7 @@ def adjacency_and_create_graph(ob, n_agents, dis_idx, graph_library):
     b = agent_ids_new.reshape(-1)
     new_b = b[nozero].reshape(-1)
     new_a = a[nozero].reshape(-1)
+    """
     if graph_library == "dgl":
         # Construct a DGLGraph
         graph = dgl.DGLGraph()
@@ -57,12 +58,12 @@ def adjacency_and_create_graph(ob, n_agents, dis_idx, graph_library):
             graph.add_edges(new_a.long().cpu(), new_b.long().cpu())
         graph.add_edges(graph.nodes(), graph.nodes()) # add self-loop
         graph.to(ob.device)
-    elif graph_library == "pyG":
-        edge_index = torch.cat([new_a.reshape(1, -1), new_b.reshape(1,-1)], dim=0)
-        if edge_index.shape[1] == 0:
-            edge_index = torch.Tensor([[0,0],[1,1]]).long().to(ob.device)
-        return edge_index
-    return graph
+    elif graph_library == "pyG":"""
+    edge_index = torch.cat([new_a.reshape(1, -1), new_b.reshape(1,-1)], dim=0)
+    if edge_index.shape[1] == 0:
+        edge_index = torch.Tensor([[0,0],[1,1]]).long().to(ob.device)
+    return edge_index
+    #return graph
 
 try:
     class GraphPyG(torch.nn.Module):

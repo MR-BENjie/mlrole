@@ -188,6 +188,6 @@ def generate_batch_relational_graph(args, map_name, batch_size, n_agents):
     src = np.array(src_all).reshape((-1,1))
     dest = np.array(dest_all).reshape((-1,1))
     edges = np.concatenate((src, dest), axis=1)
-    print(edges.T.shape)
-    print(np.array(type_all).shape)
+    #print(edges.T.shape)
+    #print(np.array(type_all).shape)
     return edges.T, np.array(type_all)

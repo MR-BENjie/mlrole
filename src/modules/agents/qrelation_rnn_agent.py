@@ -22,7 +22,7 @@ class QrelationRNNAgent(nn.Module):
 
         self.dim_x = int((input_shape-6)/(2*self.n_agents))-1
         self.agent_feats_dim = self.dim_x*self.n_agents*2
-        self.distance_index = [5+self.dim_x*i for i in range(self.n_agents*2-1)]
+        self.distance_index = [5+self.dim_x*i for i in range(self.n_agents-1)]
 
     def init_hidden(self):
         # make hidden states on same device as model
@@ -32,7 +32,7 @@ class QrelationRNNAgent(nn.Module):
         b, a, e = inputs.size()
 
         # inputs.shape = [5, 96] 4+ x*(n_agent-1) + x*(n_agent) + (x-4) + 6+n_agent + n_agent
-        g = adjacency_and_create_graph(torch.squeeze(inputs)[: self.agent_feats_dim], self.args.n_agents*2, self.distance_index, self.graph_library)
+        g = adjacency_and_create_graph(torch.squeeze(inputs)[: self.agent_feats_dim], self.args.n_agents, self.distance_index, self.graph_library)
 
         x = F.relu(self.fc1(inputs.view(-1, e)), inplace=True)
         if hidden_state is not None:
@@ -41,4 +41,4 @@ class QrelationRNNAgent(nn.Module):
         o = self.fc2(h)
 
         q = self.graph(g, o)
-        return q.view(b, a, -1), h.view(b, a, -1)
+        return q[0].view(b, a, -1), h.view(b, a, -1)
