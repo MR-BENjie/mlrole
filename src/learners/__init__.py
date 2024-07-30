@@ -10,6 +10,7 @@ from .dmaq_qatten_learner import DMAQ_qattenLearner
 from .offpg_learner import OffPGLearner
 from .fmac_learner import FMACLearner
 from .q_graph_learner import QGraphLearner
+from .group_learner import GROUPLearner
 REGISTRY = {}
 
 REGISTRY["q_learner"] = QLearner
@@ -24,3 +25,4 @@ REGISTRY["dmaq_qatten_learner"] = DMAQ_qattenLearner
 REGISTRY["offpg_learner"] = OffPGLearner
 REGISTRY["fmac_learner"] = FMACLearner
 REGISTRY["Qrelation_learner"] = QGraphLearner
+REGISTRY["group_learner"] = GROUPLearner
