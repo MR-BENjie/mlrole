@@ -7,7 +7,7 @@ epsilon_finish: 0.05
 epsilon_anneal_time: 100000
 
 runner: "parallel"
-run: "interval_run"
+#run: "interval_run"
 batch_size_run: 8
 buffer_size: 5000 
 batch_size: 128
