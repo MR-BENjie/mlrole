@@ -4,10 +4,15 @@ python src/main.py --config=qmix --env-config=sc2 with env_args.map_name=1c3s5z 
 
 
 #QRealtion model
-## prepare: pip install torch_geometric,
+## prepare: pip install torch_geometric, pydantic,
 ## prepare: pip install  dgl -f https://data.dgl.ai/wheels/torch-2.3/cu118/repo.html
 ## run
-python src/main.py --config=QRelation --env-config=sc2 with  env_args.map_name=2s3z mac=qrealtion_mac agent=qrelation_rnn judge_model_used=False batch_size=1
+- 2s3z
+`python src/main.py --config=QRelation --env-config=sc2 with  env_args.map_name=2s3z mac=qrealtion_mac agent=qrelation_rnn judge_model_used=False batch_size=1`
+- 3m
+`python src/main.py --config=QRelation --env-config=sc2 with  env_args.map_name=3m mac=qrealtion_mac agent=qrelation_rnn judge_model_used=False batch_size=1 env_args.ally_hind_ids=[1,2] env_args.enemy_hind_ids=[1,2] env_args.ally_public_ids=[0] env_args.enemy_public_ids=[0] env_args.ally_id_type_map=[1,1,1] env_args.enemy_id_type_map=[0,0,0] env_args.type_kinds=2`
+- 3s5z
+`python src/main.py --config=QRelation --env-config=sc2 with  env_args.map_name=3s5z mac=qrealtion_mac agent=qrelation_rnn judge_model_used=False batch_size=1 env_args.ally_hind_ids=[1,2,5,6,7] env_args.enemy_hind_ids=[1,2,5,6,7] env_args.ally_public_ids=[0,3,4] env_args.enemy_public_ids=[0,3,4] env_args.ally_id_type_map=[2,2,2,3,3,3,3,3] env_args.enemy_id_type_map=[0,0,0,1,1,1,1,1]`
 
 #GoMARL model( group)
 ## prepare:

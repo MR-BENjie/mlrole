@@ -159,7 +159,7 @@ def generate_full_relational_graph(args, map_name, n_agents):
             if map_name == "27m_vs_30m":
                 type = get_stakler_zealot_edge_type(i, j, n_agents, 1, 7)
             if map_name == "3m":
-                type = get_stakler_zealot_edge_type(i, j, n_agents, 1, 2)
+                type = get_stakler_zealot_edge_type(i, j, n_agents, 3, 0)
             if map_name == "6h_vs_8z":
                 type = get_stakler_zealot_edge_type(i, j, n_agents, 1, 5)
             if map_name == "corridor":
