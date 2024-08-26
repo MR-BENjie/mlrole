@@ -30,7 +30,7 @@ def get_num_edge_types(env_name, map_name):
             return 3
         elif map_name in ["3s_vs_4z", "6h_vs_8z", "corridor"]:
             return 2
-        elif map_name in ["5m_vs_6m", "3m"]:
+        elif map_name in ["5m_vs_6m", "3m", "8m", "3s_vs_3z"]:
             return 2
         elif map_name in ["8m_vs_9m", "27m_vs_30m"]:
             return 2
@@ -59,6 +59,8 @@ def build_edge_type_dict(args):
             elif args.env_args["map_name"] == "bane_vs_bane":
                 type = get_bane_bane_edge_type(a, b, args.n_agents, 4, 20)
             elif args.env_args["map_name"] == "3s_vs_4z":
+                type = get_3s4z_edge_type(a, b, args.n_agents)
+            elif args.env_args["map_name"] == "3s_vs_3z":
                 type = get_3s4z_edge_type(a, b, args.n_agents)
             elif args.env_args["map_name"] == "5m_vs_6m":
                 type = get_stakler_zealot_edge_type(a, b, args.n_agents, 1, 4)
@@ -154,12 +156,16 @@ def generate_full_relational_graph(args, map_name, n_agents):
                 type = get_stakler_zealot_edge_type(i, j, n_agents, 3, 5)
             if map_name == "5m_vs_6m":
                 type = get_stakler_zealot_edge_type(i, j, n_agents, 1, 4)
+            if args.env_args["map_name"] == "3s_vs_3z":
+                type = get_stakler_zealot_edge_type(i, j, n_agents, 3, 0)
             if map_name == "8m_vs_9m":
                 type = get_stakler_zealot_edge_type(i, j, n_agents, 1, 7)
             if map_name == "27m_vs_30m":
                 type = get_stakler_zealot_edge_type(i, j, n_agents, 1, 7)
             if map_name == "3m":
                 type = get_stakler_zealot_edge_type(i, j, n_agents, 3, 0)
+            if map_name == "8m":
+                type = get_stakler_zealot_edge_type(i, j, n_agents, 8, 0)
             if map_name == "6h_vs_8z":
                 type = get_stakler_zealot_edge_type(i, j, n_agents, 1, 5)
             if map_name == "corridor":
