@@ -127,17 +127,17 @@ class EpisodeRunner:
             self.batch.update(post_transition_data, ts=self.t)
 
             self.t += 1
-        if not test_mode:
-            if self.judge_model_used:
-                pre_types_list = torch.stack(pre_types_list)
-                target_types_list = torch.stack(target_types_list)
-                loss_judge_model = self.learner.judge_model_loss_function(pre_types_list, target_types_list)
-                self.learner.judge_optimiser.zero_grad()
-                loss_judge_model.backward()
-                self.learner.judge_optimiser.step()
-                #print("update!!!!!!!")
-                del pre_types_list
-                del target_types_list
+
+        if self.judge_model_used:
+            pre_types_list = torch.stack(pre_types_list)
+            target_types_list = torch.stack(target_types_list)
+            loss_judge_model = self.learner.judge_model_loss_function(pre_types_list, target_types_list)
+            self.learner.judge_optimiser.zero_grad()
+            loss_judge_model.backward()
+            self.learner.judge_optimiser.step()
+            #print("update!!!!!!!")
+            del pre_types_list
+            del target_types_list
 
         last_data = {
             "state": [self.env.get_state()],

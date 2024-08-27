@@ -1530,6 +1530,7 @@ class StarCraft2Env(MultiAgentEnv):
             tmp[self.enemy_id_type_map[en_id]] = 1
             target_types.append(tmp)
         input_node['ambiguous'] = torch.vstack(ambiguous)
+
         types = self.judge_model_MlroleNode(input_node)
 
         pre_types = types

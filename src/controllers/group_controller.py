@@ -7,7 +7,7 @@ import numpy as np
 
 class GroupMAC(BasicMAC):
     def __init__(self, scheme, groups, args):
-        super(NMAC, self).__init__(scheme, groups, args)
+        super(GroupMAC, self).__init__(scheme, groups, args)
         
     def select_actions(self, ep_batch, t_ep, t_env, bs=slice(None), test_mode=False, store=None):
         avail_actions = ep_batch["avail_actions"][:, t_ep]
