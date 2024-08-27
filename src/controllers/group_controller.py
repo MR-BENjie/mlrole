@@ -5,7 +5,7 @@ import torch as th
 from utils.rl_utils import RunningMeanStd
 import numpy as np
 
-class NMAC(BasicMAC):
+class GroupMAC(BasicMAC):
     def __init__(self, scheme, groups, args):
         super(NMAC, self).__init__(scheme, groups, args)
         
